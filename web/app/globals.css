@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+:root {
+  --ink: #0f1c14;
+  --muted: #4a5c50;
+  --line: #c8d4cc;
+  --paper: #f3f6f2;
+  --paper-deep: #e4ebe5;
+  --accent: #1f6b4a;
+  --accent-soft: #d7ebe0;
+  --warn: #8a3b12;
+  --surface: rgba(255, 255, 255, 0.72);
+}
+
+@theme inline {
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-paper: var(--paper);
+  --color-paper-deep: var(--paper-deep);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-warn: var(--warn);
+  --font-sans: var(--font-display);
+  --font-mono: var(--font-mono);
+}
+
+body {
+  min-height: 100%;
+  color: var(--ink);
+  background:
+    radial-gradient(ellipse 80% 50% at 10% -10%, #d8ebe0 0%, transparent 55%),
+    radial-gradient(ellipse 60% 40% at 100% 0%, #e8efe4 0%, transparent 50%),
+    linear-gradient(180deg, var(--paper) 0%, var(--paper-deep) 100%);
+  font-family: var(--font-display), "Iowan Old Style", "Palatino Linotype",
+    Palatino, Georgia, serif;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  opacity: 1;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.35s ease-out both;
+}
