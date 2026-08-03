@@ -1,0 +1,22 @@
+# CMake / C++
+build/
+cmake-build-*/
+out/
+*.o
+*.a
+*.dylib
+*.so
+*.exe
+.cache/
+
+# IDE / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*~
+
+# Env / secrets
+.env
+.env.*
+!.env.example

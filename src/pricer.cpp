@@ -37,9 +37,9 @@ struct Analytic {
   }
   static double r_term(const BSModel& m){ return m.r*std::exp(-m.r*m.T)*m.S0*0.0; } // unused
   static double q_term(const BSModel& m){ return m.q*std::exp(-m.q*m.T)*m.S0*0.0; } // unused
-}
+};
 
-; // namespace
+} // namespace
 
 PriceGreeks Pricer::black_scholes(const Payoff& payoff) const {
   // Detect basic vanilla types with dynamic_cast; fallback to finite differences for exotic payoff price only.

@@ -13,3 +13,8 @@ target_link_libraries(options_tests PRIVATE optionslib)
 
 add_executable(options_bench bench/bench.cpp)
 target_link_libraries(options_bench PRIVATE optionslib)
+
+find_package(Threads REQUIRED)
+add_executable(options_api api/main.cpp)
+target_include_directories(options_api PRIVATE third_party)
+target_link_libraries(options_api PRIVATE optionslib Threads::Threads)
