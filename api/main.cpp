@@ -21,6 +21,15 @@ using json = nlohmann::json;
 
 namespace {
 
+// Production frontend (Vercel). Also set CORS_ORIGIN on Render to this value.
+constexpr const char* kProdFrontendOrigin =
+    "https://options-pricing-library-c.vercel.app";
+
+std::string normalize_origin(std::string s) {
+  while (!s.empty() && s.back() == '/') s.pop_back();
+  return s;
+}
+
 int port_from_env() {
   const char* p = std::getenv("PORT");
   if (!p || !*p) return 8080;
@@ -32,9 +41,11 @@ int port_from_env() {
 }
 
 bool origin_allowed(const std::string& origin) {
-  if (origin == "http://localhost:3000") return true;
+  const std::string o = normalize_origin(origin);
+  if (o == "http://localhost:3000") return true;
+  if (o == kProdFrontendOrigin) return true;
   const char* env = std::getenv("CORS_ORIGIN");
-  return env && *env && origin == env;
+  return env && *env && o == normalize_origin(env);
 }
 
 void set_cors(const httplib::Request& req, httplib::Response& res) {
@@ -722,7 +733,7 @@ int main() {
   });
 
   std::cout << "options_api listening on 0.0.0.0:" << port
-            << " (CORS: http://localhost:3000"
+            << " (CORS: http://localhost:3000 + " << kProdFrontendOrigin
             << (cors_env && *cors_env ? std::string(" + ") + cors_env : "")
             << ")" << std::endl;
   if (!svr.listen("0.0.0.0", port)) {

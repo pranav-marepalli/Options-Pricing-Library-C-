@@ -1,7 +1,7 @@
 # fly.toml — deploy-ready config for the options_api container.
 # First-time: fly launch --copy-config  (or: fly apps create options-api)
 # Then set CORS for your Vercel origin:
-#   fly secrets set CORS_ORIGIN=https://your-app.vercel.app
+#   fly secrets set CORS_ORIGIN=https://options-pricing-library-c.vercel.app
 # Deploy:
 #   fly deploy
 app = "options-api"

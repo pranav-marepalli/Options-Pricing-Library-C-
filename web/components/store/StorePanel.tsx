@@ -64,9 +64,14 @@ export default function StorePanel() {
   }, []);
 
   useEffect(() => {
-    void refresh();
+    // Deferred via setTimeout so the initial setState calls inside refresh()
+    // don't happen synchronously during the effect (react-hooks/set-state-in-effect).
+    const kickoff = setTimeout(() => void refresh(), 0);
     const id = setInterval(() => void refresh(), 4000);
-    return () => clearInterval(id);
+    return () => {
+      clearTimeout(kickoff);
+      clearInterval(id);
+    };
   }, [refresh]);
 
   return (
