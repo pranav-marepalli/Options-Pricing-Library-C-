@@ -32,11 +32,13 @@ struct Analytic {
     double delta = c.delta - df_q;
     double gamma = c.gamma;
     double vega  = c.vega;
-    double theta = c.theta + r_term(m) - q_term(m);
+    double theta = c.theta + r_term(m, K) - q_term(m);
     return {price, delta, gamma, vega, theta};
   }
-  static double r_term(const BSModel& m){ return m.r*std::exp(-m.r*m.T)*m.S0*0.0; } // unused
-  static double q_term(const BSModel& m){ return m.q*std::exp(-m.q*m.T)*m.S0*0.0; } // unused
+  // Put-call parity correction terms for theta:
+  //   theta_put = theta_call + r*K*exp(-r*T) - q*S0*exp(-q*T)
+  static double r_term(const BSModel& m, double K){ return m.r*K*std::exp(-m.r*m.T); }
+  static double q_term(const BSModel& m){ return m.q*m.S0*std::exp(-m.q*m.T); }
 };
 
 } // namespace
@@ -57,8 +59,8 @@ PriceGreeks Pricer::black_scholes(const Payoff& payoff) const {
     // Here we approximate price by expected discounted payoff under lognormal via Gauss-Hermite (2-point) quadrature.
     double mu = (m_.r - m_.q - 0.5*m_.sigma*m_.sigma)*m_.T;
     double sd = m_.sigma*std::sqrt(m_.T);
-    double z1 =  1/std::sqrt(2.0);
-    double z2 = -1/std::sqrt(2.0);
+    double z1 =  1.0;
+    double z2 = -1.0;
     double ST1 = S*std::exp(mu + sd*z1);
     double ST2 = S*std::exp(mu + sd*z2);
     double df  = std::exp(-m_.r*m_.T);
@@ -80,8 +82,6 @@ double Pricer::implied_vol(const Payoff& payoff, double target, double guess) co
   double last = vol;
   for(int iter=0; iter<100; ++iter){
     BSModel m2 = m_; m2.sigma = vol;
-    PriceGreeks g = black_scholes(payoff);
-    m2 = m_; m2.sigma = vol;
     // Compute price and vega analytically when possible
     double price, vega;
     if(auto c = dynamic_cast<const Call*>(&payoff)){
@@ -91,14 +91,16 @@ double Pricer::implied_vol(const Payoff& payoff, double target, double guess) co
       auto pg = Analytic::put(m2, p->K);
       price = pg.price; vega = pg.vega;
     } else {
-      // Fallback finite-diff on vol
+      // Fallback finite-diff on vol: price the payoff under three distinct
+      // models (current vol, bumped up, bumped down) via temporary Pricer
+      // instances so each call actually sees its own sigma.
       BSModel m_up = m2, m_dn = m2;
       double h = 1e-4;
       m_up.sigma = vol*(1+h); m_dn.sigma = vol*(1-h);
-      // use call/put path through analytic if unknown payoff not supported
-      price = black_scholes(payoff).price; // approximate
-      double p_up = black_scholes(payoff).price; // rough; acceptable for IV iteration in demo
-      double p_dn = black_scholes(payoff).price;
+      Pricer pricer_cur(m2), pricer_up(m_up), pricer_dn(m_dn);
+      price = pricer_cur.black_scholes(payoff).price;
+      double p_up = pricer_up.black_scholes(payoff).price;
+      double p_dn = pricer_dn.black_scholes(payoff).price;
       vega = (p_up - p_dn)/(2*h*vol + 1e-12);
     }
     double diff = price - target;

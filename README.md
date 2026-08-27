@@ -54,10 +54,12 @@ docker run --rm -p 8080:8080 -e CORS_ORIGIN=http://localhost:3000 options-api
 
 ## Deploy env vars
 
-| Where | Variable | Purpose |
-|-------|----------|---------|
-| Vercel (`web/`) | `NEXT_PUBLIC_API_URL` | Public API base URL (e.g. `https://options-api.fly.dev`) |
-| Fly (`options_api`) | `CORS_ORIGIN` | Allowed browser origin (e.g. `https://your-app.vercel.app`) |
-| Fly / Docker | `PORT` | Listen port (default `8080`) |
+| Where | Variable | Value |
+|-------|----------|-------|
+| Vercel (`web/`) | `NEXT_PUBLIC_API_URL` | `https://options-pricing-library-c.onrender.com` |
+| Render (`options_api`) | `CORS_ORIGIN` | `https://options-pricing-library-c.vercel.app` (no trailing `/`) |
+| Render / Docker | `PORT` | Set by host (Render assigns automatically) |
 
-See `fly.toml` for the API deploy stub (`fly deploy`).
+Production Vercel origin is also allowed in `api/main.cpp` for CORS. Redeploy Vercel after changing `NEXT_PUBLIC_API_URL` (build-time var).
+
+See `fly.toml` for an alternate Fly.io API deploy stub.
